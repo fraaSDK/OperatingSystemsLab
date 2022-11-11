@@ -1,0 +1,4 @@
+a b c d e    f g*
+cane    gatto volpe *topo uccello   criceto* pesce
+alfa beta   gamma *omega   lambda ro   pi*
+Lorem ipsum* dolor  sit* amet consectetur adipiscing* elit
