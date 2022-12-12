@@ -40,8 +40,6 @@ void *Thread (void *arg)
 		*/
 		DBGpthread_mutex_lock(&mutex, (char*)mioindice);
 
-		if (turno >= NUMTHREADS) turno = 0;
-
 		while (turno != mioindice) {
 			pthread_cond_wait(&cond, &mutex);
 			/* If thread is waken up, but it's not its turn, it needs to awake another thread before sleeping. */
@@ -64,7 +62,7 @@ void *Thread (void *arg)
 		   E PER STABILIRE CHE E' IL PROSSIMO THREAD "di turno"
 		   E PER FARLO ENTRARE IN SEZIONE CRITICA
 		*/
-		turno++;
+		turno = (turno + 1) % NUMTHREADS;	/* In case we reach the max amount of set threads, we reset to 0. */
 		pthread_cond_signal(&cond);
 		DBGpthread_mutex_unlock(&mutex, (char*)mioindice);
 
