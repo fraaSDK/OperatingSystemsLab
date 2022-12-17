@@ -107,6 +107,11 @@ void *cliente (void *arg)
 		/* Incrementing the amount of customers who are being served. */
 		served_customers++;
 
+#ifdef DO_OUTPUT
+		printf("il cliente %s si serve al bancone: biglietto %ld  bigliettoSulDisplay %ld \n", Clabel, biglietto, bigliettoSulDisplay ); 
+		fflush(stdout);
+#endif
+
 		/* If there is place for another customer, we wake up all the other threads so one can get the mutex. */
 		if (served_customers < 2) {
 			bigliettoSulDisplay++;
@@ -118,10 +123,6 @@ void *cliente (void *arg)
 
 		/* il cliente si serve al bancone */
 
-#ifdef DO_OUTPUT
-		printf("il cliente %s si serve al bancone: biglietto %ld  bigliettoSulDisplay %ld \n", Clabel, biglietto, bigliettoSulDisplay ); 
-		fflush(stdout);
-#endif
 		/* il cliente impiega circa 2 secondi a servirsi */
 		sleep( 2 );
 
