@@ -46,13 +46,36 @@ void stampaerrore(int errorcode, char *str)
 void *fachiro(void *arg)
 {
 	int rc, i;
+	intptr_t index = (intptr_t)arg;
+
 	while(1) {
 
 		/* AGGIUNGERE PRENDERE SPADE */
-		int indice = (int*)arg;
-		if (indice == 0) {
+
+		/*
+		 * Facendo prendere le 10 spade ai fachiri
+		 * in ordine opposto, si arriverà al momento in cui
+		 * non ci saranno più spade disponibili e quindi
+		 * i thread andranno in deadlock.
+		*/
+
+		/* Caso fachiro 1. */
+		if (index == 0) {
 			for (i = 0; i < 10; i++) {
-				lock(mutex[i]);
+				printf("F%" PRIiPTR " is trying to take sword %d\n", index, i);
+				rc = pthread_mutex_lock(&mutex[i]);
+				if (rc) printf("F%" PRIiPTR ": Error in mutex lock\n", index);
+				else printf("F%" PRIiPTR " takes the sword %d.\n", index, i);
+			}
+		}
+
+		/* Caso fachiro 2. */
+		if (index == 1) {
+			for (i = 9; i >= 0; i--) {
+				printf("F%" PRIiPTR " is trying to take sword %d\n", index, i);
+				rc = pthread_mutex_lock(&mutex[i]);
+				if (rc) printf("F%" PRIiPTR ": Error in mutex lock\n", index);
+				else printf("F%" PRIiPTR " takes the sword %d.\n", index, i);
 			}
 		}
 
@@ -63,8 +86,23 @@ void *fachiro(void *arg)
 		fflush(stdout);
 
 		/* AGGIUNGERE RILASCIARE SPADE */
+		if (index == 0) {
+			for (i = 0; i < 10; i++) {
+				printf("F%" PRIiPTR " is trying to release sword %d\n", index, i);
+				rc = pthread_mutex_unlock(&mutex[i]);
+				if (rc) printf("F%" PRIiPTR ": Error in mutex unlock\n", index);
+				else printf("F%" PRIiPTR " releases the sword %d.\n", index, i);
+			}
+		}
 
-
+		if (index == 1) {
+			for (i = 9; i >= 0; i--) {
+				printf("F%" PRIiPTR " is trying to release sword %d\n", index, i);				
+				rc = pthread_mutex_unlock(&mutex[i]);
+				if (rc) printf("F%" PRIiPTR ": Error in mutex unlock\n", index);
+				else printf("F%" PRIiPTR " releases the sword %d.\n", index, i);
+			}
+		}
 
 		/* FINE AGGIUNTA PER RILASCIARE SPADE */
 
