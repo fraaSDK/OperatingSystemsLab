@@ -52,8 +52,9 @@ void *student(void *arg) {
             pthread_exit(NULL);
         }
 
-        /* Checking if its thread's turn. */
+        /* Not enough forms, waking up secretary. */
         while (current_forms_num == 0) {
+            pthread_cond_signal(&refill_cond);
             pthread_cond_wait(&student_turn_cond, &forms_mutex);
         }
 
@@ -61,13 +62,11 @@ void *student(void *arg) {
         /* Filling the form... */
         sleep(1);
         current_forms_num--;
-
-        /* Not enough forms, waking secretary. */
-        if (current_forms_num <= 0) pthread_cond_signal(&refill_cond);
-        else pthread_cond_signal(&student_turn_cond); /* Checking if its their turn. */
         
         /*current_student = (current_student + 1) % STUDENT_NUM;*/
         printf("[Student%d] DONE\t Forms: %d\n", index, current_forms_num);
+
+        /* current_student = (current_student + 1) % STUDENT_NUM; */
         
         ret = pthread_mutex_unlock(&forms_mutex);
         if (ret) {
@@ -100,7 +99,7 @@ int main() {
         }
     }
 
-    pthread_mutex_destroy(&forms_mutex);
+    /* pthread_mutex_destroy(&forms_mutex); */
     pthread_exit(NULL);
     return 0;
 }
