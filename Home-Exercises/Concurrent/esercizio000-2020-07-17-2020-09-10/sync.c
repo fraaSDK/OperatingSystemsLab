@@ -9,7 +9,7 @@ pthread_mutex_t mutex;
 pthread_cond_t cond;
 
 int current_threads = 0;
-int current_turn = 0;
+int turn = 0;
 int ret;
 
 /* Simple error handling function. */
@@ -21,34 +21,36 @@ void handle_error(const int ret, const char* err_type, const char* th_name) {
 
 void *thread(void *arg) {
 
-    int turn = (intptr_t)arg;
+    int index = (intptr_t)arg;
+    int th_turn;
 
     ret = pthread_mutex_lock(&mutex);
     handle_error(ret, "pthread_mutex_lock", "thread");
 
-    /* If its not our turn, we signal the other threads*/
-    while (turn != current_turn) {
-        pthread_cond_signal(&cond);
-        pthread_cond_wait(&cond, &mutex);
-    }
-    current_turn++;
-
-    printf("[+] T%d is active\n", turn);
-    sleep(1);
+    /* Assigning a turn to each thread. */
+    th_turn = turn;
+    turn++;
+    printf("[T%d]: assigned turn %d starts.\n", index, th_turn);
 
     current_threads++;
+    sleep(1);
 
-    if (current_threads == NUM_THREADS) {
+    /*
+     * All threads are waiting.
+     * Starting the exit cascade
+     * based by turn.
+    */
+    if (current_threads == 5) {
         pthread_cond_signal(&cond);
     }
 
-    /* Waiting for the other threads to arrive before exiting. */
+    /* Waiting for all threads. */
     pthread_cond_wait(&cond, &mutex);
 
-    printf("[-] T%d is ending.\n", turn);
-
-    /* Waking next thread. */
     pthread_cond_signal(&cond);
+
+    /* Exit all threads by turn. */
+    printf("[T%d]: assigned turn %d ends.\n", index, th_turn);
 
     ret = pthread_mutex_unlock(&mutex);
     handle_error(ret, "pthread_mutex_unlock", "thread");
